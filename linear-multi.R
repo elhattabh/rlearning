@@ -44,7 +44,7 @@ plot(medv~lstat)
 points(lstat, fitted(fit6), col="red", pch=21) #pch is the plotting character
 
 #use poly function
-fit7=lm(medv~poly(lstat,4)) #polynomoial of degree 4 of lstat, clearly overfitting
+fit7=lm(medv~poly(lstat,2)) #polynomoial of degree 4 of lstat, clearly overfitting
 points(lstat,fitted(fit7),col="blue", pch=20)
 
 fit7=lm(medv~poly(lstat,3)) #polynomoial of degree 4 of lstat, clearly overfitting
