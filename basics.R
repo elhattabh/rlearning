@@ -67,7 +67,7 @@ plot(horsepower, mpg)
 identify(horsepower,mpg,name)
 
 # — to find the nulls in a data frame:
-  apply(basefile,2,function(x){sum(is.na(x))})
+apply(basefile,2,function(x){sum(is.na(x))})
 
 # — to order things/loop through
 
@@ -125,5 +125,11 @@ mm <- model.matrix(formula,data=train)
 mmtest <- model.matrix(formula, data=test)
 
 cvmn <- cv.glmnet(mm, to$outcome_contrib, family="binomial", standardize=FALSE, nlambda=30, type.measure="auc", nfold=10)
+
+cvmn.0_29 <- cv.glmnet(mm[,-1], basefile$incomebucket_a0k_29k, alpha=1.0, family = "binomial", type.measure = "auc", standardize=TRUE, nlambda=20, nfold=10, maxit=100000, parallel=TRUE)
+# cvmn.0_29 <- cv.glmnet(mm[,-1], basefile[1:round(nrow(basefile)*0.8,0),]$incomebucket_a0k_29k, alpha=0.0, family = "binomial", type.measure = "auc", standardize=TRUE, nlambda=20, nfold=10, maxit=100000, parallel=TRUE)
+
+# train <- basefile[1:round(nrow(basefile)*0.8,0),]
+basefile$pred0_29 <- predict(cvmn.0_29, newx=mm[,-1], type="response", s = "lambda.min")
 
 
