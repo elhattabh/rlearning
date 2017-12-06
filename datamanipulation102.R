@@ -29,12 +29,12 @@ unique(iris$Species)
 newiris <- dplyr::tbl_df(iris)
 
 #removing duplicate rows
-dplyr::distinct(iris)
+iris=dplyr::distinct(iris)
 
 #selecting all except one column
-iris2 <- select(iris, -Species)
+iris2 <- select(iris, -Species, -Sepal.Length)
 #selecting multiple columns
-iris2 <- select(iris, c(Sepal.Length,Species))
+iris2 <- select(iris, c(Petal.Length,Species))
 
 #ordering
 head(dplyr::arrange(iris, desc(Sepal.Width)))
@@ -73,7 +73,7 @@ dplyr::summarise_each(iris2, funs(count))
 #sum by a specific column
 x<-iris1 %>% 
   group_by(Species) %>% 
-  summarise(sepal_width = sum(sepal_width)) 
+  summarise(sumsepalwidth = sum(Sepal.Width)) 
 
 #adding a column thats a result of others
 head(dplyr::mutate(iris, sepal = Sepal.Length + Sepal.Width),20)
@@ -145,4 +145,23 @@ iris2[1:5,]
 #time series
 ggplot(data=ChickWeight, aes(x=Time, y=weight, color=Diet, group=Chick)) +
   geom_line() + ggtitle("Growth curve for individual chicks")
+
+#gaussian modeling
+formula = as.formula(medv ~ (.)^2)
+#trying lasso not squaring to see all the features
+formula = as.formula(medv ~ (.))
+
+mm <- model.matrix(formula,data=train)
+mmtest <- model.matrix(formula, data=test)
+cv.glmnet(medv, dep0, family="gaussian", nfolds = 10, alpha = 0 )
+train.cvmn <- cv.glmnet(mm[ , -1], train$medv, family="gaussian", nlambda=60, standardize=FALSE, type.measure="mse", nfold=10,alpha=.5)
+cvmn <- glmnet(mm[ , -1], train$medv,family="gaussian",alpha=.5,standardize = FALSE, lambda = train.cvmn$lambda.min)
+plot(cvmn)
+
+#tosee the coefs by abs value
+coef <- coef(cvmn, s=cvmn$lambda.1se)[order(abs(coef(cvmn, s=cvmn$lambda.1se)), decreasing = TRUE)]
+names <- rownames(coef(cvmn, s=cvmn$lambda.1se))[order(abs(coef(cvmn, s=cvmn$lambda.1se)), decreasing = TRUE)][1:30]
+for (iii in 1:30){
+  cat(names[[iii]],"\t",coef[[iii]],"\n")
+}
 
